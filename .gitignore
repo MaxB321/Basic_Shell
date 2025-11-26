@@ -1,0 +1,16 @@
+# ignore object files
+*.o
+*.gch
+
+# ignore executables
+*.exe
+
+# ignore build directories
+/build/
+/bin/
+/obj/
+
+# ignore backup/editor files
+*~
+*.swp
+
