@@ -1,16 +1,19 @@
-# ignore object files
+# object files
 *.o
 *.gch
 
-# ignore executables
+# executables
 *.exe
 
-# ignore build directories
-/build/
+# build directories
+/build-debug/
+/build-release/
 /bin/
 /obj/
 
-# ignore backup/editor files
+# backup/editor files
 *~
 *.swp
 
+# changes and bugs doc
+todo.txt
