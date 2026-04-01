@@ -1,18 +1,19 @@
-**THIS APP IS UNDER CONSTRUCTION**
+**THIS APP IS UNDER CONSTRUCTION!!!**
 
 THIS IS A SIMPLE TERMINAL!
 
 Featured Commands:
   1. exit
   2. echo
-  3. pwd & cd
-  4. ls
-  5. clear
-  6. touch
-  7. mkdir
-  8. rm
-  9. rm -r
-  10. cat
-  11. grep
-  12. cp
-  13. mv
+  3. pwd
+  4. cd
+  5. ls
+  6. clear
+  7. touch
+  8. mkdir
+  9. rm
+  10. rm -r
+  11. cat
+  12. grep
+  13. cp
+  14. mv
