@@ -8,11 +8,11 @@ int main()
 
 	while (true)
 	{
-		std::cout << defaultPath << "> ";
+		std::cout << GREEN_TEXT << defaultPath << "> " << NORMAL_TEXT;
 		std::cin >> userInput;
 		if (std::find(commands_start, commands_end, userInput) == commands_end)
 		{
-			std::cerr << "Error: " << userInput << " is not a valid command" << std::endl;
+			std::cerr << RED_TEXT << "Error: " << userInput << " is not a valid command" << NORMAL_TEXT << std::endl;
 		}
 		else
 		{

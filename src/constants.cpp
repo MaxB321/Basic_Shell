@@ -1,5 +1,6 @@
 #include "constants.h"
 
+
 const char* defaultPath{std::getenv("USERPROFILE")};
 
 const std::string_view commands[] {
