@@ -7,7 +7,7 @@ void catExec(){}
 void cdExec(){}
 void clearExec(){}
 
-void commandHandler(uint32_t commandIndex, std::string& userInput)
+void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs)
 {
     switch (commandIndex)
     {
@@ -55,3 +55,7 @@ void touchExec(std::string& userInput)
     
 }
 
+bool validateArgs()
+{
+    return true;
+}
