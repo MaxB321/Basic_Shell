@@ -1,11 +1,26 @@
 #include "command_handler.h"
+#include "constants.h"
 #include "enums.h"
 #include "flags.h"
 #include "utility.h"
 
 
+char* currentPath{std::getenv("USERPROFILE")};
+
+
 void catExec(){} 
-void cdExec(){}
+void cdExec(std::istringstream& argsString)
+{
+    std::string argPath{};
+    std::getline(argsString, argPath);
+    utility::trimString(argPath);
+
+    if (!validatePath(argPath))
+        std::cerr << RED_TEXT << "Error: " << argPath << " is not a valid path" << NORMAL_TEXT << std::endl;
+        return;
+    
+    
+}
 
 void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
 {
@@ -21,8 +36,10 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
             echoExec(argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Pwd):
+            std::cout << "Path: " << currentPath << '\n';
             break;
         case static_cast<uint32_t>(commandsEnum::Cd):
+            cdExec(argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Ls):
             break;
@@ -61,7 +78,7 @@ void grepExec(){}
 void lsExec(){}
 void mkdirExec(){}
 void mvExec(){}
-void pwdExec(){}
+
 void rmExec(){}
 
 void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString)
@@ -81,4 +98,10 @@ void touchExec()
 bool validateArgs()
 {
     return true;
+}
+
+bool validatePath(std::string& path)
+{
+
+    return false;
 }

@@ -1,7 +1,9 @@
 #include "pch.h"
 
+extern char* currentPath;
+
 extern void catExec();
-extern void cdExec();
+extern void cdExec(std::istringstream& argsString);
 extern void clearExec();
 extern void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString); 
 extern void cpExec();
@@ -15,3 +17,4 @@ extern void rmExec();
 extern void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString);
 extern void touchExec();
 extern bool validateArgs();
+extern bool validatePath(std::string& path);

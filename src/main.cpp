@@ -13,7 +13,7 @@ int main()
 
 	while (PROGRAM_RUNNING)
 	{
-		std::cout << GREEN_TEXT << defaultPath << "> " << NORMAL_TEXT;
+		std::cout << GREEN_TEXT << currentPath << "> " << NORMAL_TEXT;
 		std::getline(std::cin, userInput);
 		std::istringstream inputStream(userInput);
 		inputStream >> command;
