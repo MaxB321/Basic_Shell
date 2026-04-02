@@ -16,22 +16,8 @@ int main()
 		std::cout << GREEN_TEXT << defaultPath << "> " << NORMAL_TEXT;
 		std::getline(std::cin, userInput);
 		std::istringstream inputStream(userInput);
-		std::string arg{};
 		inputStream >> command;
-		if (command == "echo")
-		{
-			std::string echoOutput{};
-			std::getline(inputStream, echoOutput);
-			inputArgs.push_back(echoOutput);
-		}
-		else
-		{
-			while (inputStream >> arg)
-			{
-				inputArgs.push_back(arg);
-			}
-		} 
-		
+		std::istringstream& argsString{inputStream};
 
 		auto arr_it{std::find(commands_start, commands_end, command)};
 
@@ -42,7 +28,7 @@ int main()
 		else
 		{
 			uint32_t command_index = static_cast<uint32_t>(arr_it - commands_start);
-			commandHandler(command_index, inputArgs);
+			commandHandler(command_index, inputArgs, argsString);
 		}
 		inputArgs.clear();
 	}

@@ -1,12 +1,13 @@
 #include "command_handler.h"
 #include "enums.h"
 #include "flags.h"
+#include "utility.h"
 
 
 void catExec(){} 
 void cdExec(){}
 
-void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs)
+void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
 {
     if (!validateArgs())
         return;
@@ -17,7 +18,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs)
             PROGRAM_RUNNING = false;
             break;
         case static_cast<uint32_t>(commandsEnum::Echo):
-            std::cout << inputArgs[0] << '\n';
+            echoExec(argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Pwd):
             break;
@@ -47,9 +48,13 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs)
 
 void cpExec(){}
 
-void echoExec()
+void echoExec(std::istringstream& argsString)
 {
+    std::string echoOutput{};
+	std::getline(argsString, echoOutput);
+    utility::trimString(echoOutput);
 
+    std::cout << echoOutput << '\n';
 }
 
 void grepExec(){}
@@ -59,7 +64,16 @@ void mvExec(){}
 void pwdExec(){}
 void rmExec(){}
 
-void touchExec(std::string& userInput)
+void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString)
+{
+    std::string arg{};
+    while (argsString >> arg)
+    {
+        inputArgs.push_back(arg);
+    }
+}
+
+void touchExec()
 {
     
 }
