@@ -18,10 +18,20 @@ int main()
 		std::istringstream inputStream(userInput);
 		std::string arg{};
 		inputStream >> command;
-		while (inputStream >> arg)
+		if (command == "echo")
 		{
-			inputArgs.push_back(arg);
+			std::string echoOutput{};
+			std::getline(inputStream, echoOutput);
+			inputArgs.push_back(echoOutput);
 		}
+		else
+		{
+			while (inputStream >> arg)
+			{
+				inputArgs.push_back(arg);
+			}
+		} 
+		
 
 		auto arr_it{std::find(commands_start, commands_end, command)};
 

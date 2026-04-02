@@ -5,16 +5,19 @@
 
 void catExec(){} 
 void cdExec(){}
-void clearExec(){}
 
 void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs)
 {
+    if (!validateArgs())
+        return;
+
     switch (commandIndex)
     {
         case static_cast<uint32_t>(commandsEnum::Exit):
             PROGRAM_RUNNING = false;
             break;
         case static_cast<uint32_t>(commandsEnum::Echo):
+            std::cout << inputArgs[0] << '\n';
             break;
         case static_cast<uint32_t>(commandsEnum::Pwd):
             break;
@@ -23,6 +26,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs)
         case static_cast<uint32_t>(commandsEnum::Ls):
             break;
         case static_cast<uint32_t>(commandsEnum::Clear):
+            system("CLS");
             break;
         case static_cast<uint32_t>(commandsEnum::Touch):
             break;
@@ -42,7 +46,12 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs)
 }
 
 void cpExec(){}
-void echoExec(){}
+
+void echoExec()
+{
+
+}
+
 void grepExec(){}
 void lsExec(){}
 void mkdirExec(){}
