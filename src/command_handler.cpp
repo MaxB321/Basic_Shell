@@ -5,7 +5,7 @@
 #include "utility.h"
 
 
-char* currentPath{std::getenv("USERPROFILE")};
+std::string currentPath{std::getenv("USERPROFILE")};
 
 
 void catExec(){} 
@@ -18,7 +18,7 @@ void cdExec(std::istringstream& argsString)
     if (!validatePath(argPath))
         std::cerr << RED_TEXT << "Error: " << argPath << " is not a valid path" << NORMAL_TEXT << std::endl;
         return;
-    
+
     
 }
 
