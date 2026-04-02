@@ -12,5 +12,4 @@ extern void mkdirExec();
 extern void mvExec();
 extern void pwdExec();
 extern void rmExec();
-extern void rmRExec();
-extern void touchExec();
+extern void touchExec(std::string& userInput);

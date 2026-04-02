@@ -13,7 +13,6 @@ const std::string_view commands[] {
     "touch",
     "mkdir",
     "rm",
-    "rm -r",
     "cat",
     "grep",
     "cp",

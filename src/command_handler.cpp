@@ -3,9 +3,9 @@
 #include "flags.h"
 
 
-void catExec(){};
-void cdExec(){};
-void clearExec(){};
+void catExec(){} 
+void cdExec(){}
+void clearExec(){}
 
 void commandHandler(uint32_t commandIndex, std::string& userInput)
 {
@@ -30,8 +30,6 @@ void commandHandler(uint32_t commandIndex, std::string& userInput)
             break;
         case static_cast<uint32_t>(commandsEnum::Rm):
             break;
-        case static_cast<uint32_t>(commandsEnum::Rm_r):
-            break;
         case static_cast<uint32_t>(commandsEnum::Cat):
             break;
         case static_cast<uint32_t>(commandsEnum::Grep):
@@ -43,16 +41,17 @@ void commandHandler(uint32_t commandIndex, std::string& userInput)
     }
 }
 
-void cpExec(){};
-void echoExec(){};
-void grepExec(){};
-void lsExec(){};
-void mkdirExec(){};
-void mvExec(){};
-void pwdExec(){};
-void rmExec(){};
-void rmRExec(){};
-void touchExec(){};
+void cpExec(){}
+void echoExec(){}
+void grepExec(){}
+void lsExec(){}
+void mkdirExec(){}
+void mvExec(){}
+void pwdExec(){}
+void rmExec(){}
 
-
+void touchExec(std::string& userInput)
+{
+    
+}
 

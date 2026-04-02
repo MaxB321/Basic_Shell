@@ -11,7 +11,6 @@ enum class commandsEnum : uint32_t
     Touch,
     Mkdir,
     Rm,
-    Rm_r,
     Cat,
     Grep,
     Cp,
