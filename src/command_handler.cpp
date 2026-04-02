@@ -16,17 +16,13 @@ void cdExec(std::istringstream& argsString)
     utility::trimString(argPath);
 
     if (!validatePath(argPath))
-        std::cerr << RED_TEXT << "Error: " << argPath << " is not a valid path" << NORMAL_TEXT << std::endl;
         return;
 
-    
+    currentPath = argPath;
 }
 
 void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
 {
-    if (!validateArgs())
-        return;
-
     switch (commandIndex)
     {
         case static_cast<uint32_t>(commandsEnum::Exit):
@@ -83,6 +79,14 @@ void rmExec(){}
 
 void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString)
 {
+    if (!validateArgs(argsString))
+    {
+        std::string args{};
+        std::getline(argsString, args);
+        utility::trimString(args);
+        std::cerr << RED_TEXT << "Error: " << args << " is not a valid path" << NORMAL_TEXT << std::endl;
+        return;
+    }
     std::string arg{};
     while (argsString >> arg)
     {
@@ -95,13 +99,22 @@ void touchExec()
     
 }
 
-bool validateArgs()
+bool validateArgs(std::istringstream& argsString)
 {
     return true;
 }
 
 bool validatePath(std::string& path)
 {
+    try
+    {
+        std::filesystem::current_path(path);
+    }
+    catch(const std::exception& e)
+    {
+        std::cerr << e.what() << '\n';
+        return false;
+    }
 
-    return false;
+    return true;
 }

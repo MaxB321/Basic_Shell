@@ -14,5 +14,5 @@ extern void mvExec();
 extern void rmExec();
 extern void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString);
 extern void touchExec();
-extern bool validateArgs();
+extern bool validateArgs(std::istringstream& argsString);
 extern bool validatePath(std::string& path);
