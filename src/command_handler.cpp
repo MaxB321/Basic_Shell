@@ -9,13 +9,14 @@ std::string currentPath{std::getenv("USERPROFILE")};
 
 
 void catExec(){} 
+
 void cdExec(std::istringstream& argsString)
 {
     std::string argPath{};
     std::getline(argsString, argPath);
     utility::trimString(argPath);
 
-    if (!validatePath(argPath))
+    if (!isValidPath(argPath))
         return;
 
     currentPath = argPath;
@@ -39,6 +40,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
             cdExec(argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Ls):
+            lsExec();
             break;
         case static_cast<uint32_t>(commandsEnum::Clear):
             system("CLS");
@@ -72,40 +74,13 @@ void echoExec(std::istringstream& argsString)
 }
 
 void grepExec(){}
-void lsExec(){}
-void mkdirExec(){}
-void mvExec(){}
 
-void rmExec(){}
-
-void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString)
-{
-    if (!validateArgs(argsString))
-    {
-        std::string args{};
-        std::getline(argsString, args);
-        utility::trimString(args);
-        std::cerr << RED_TEXT << "Error: " << args << " is not a valid path" << NORMAL_TEXT << std::endl;
-        return;
-    }
-    std::string arg{};
-    while (argsString >> arg)
-    {
-        inputArgs.push_back(arg);
-    }
-}
-
-void touchExec()
-{
-    
-}
-
-bool validateArgs(std::istringstream& argsString)
+bool isValidArgs(std::istringstream& argsString)
 {
     return true;
 }
 
-bool validatePath(std::string& path)
+bool isValidPath(std::string& path)
 {
     try
     {
@@ -119,3 +94,47 @@ bool validatePath(std::string& path)
 
     return true;
 }
+
+void lsExec()
+{
+    for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(currentPath))
+    {
+        if (std::filesystem::is_directory(entry.status()))
+        {
+            std::cout << BLUE_TEXT << "[DIR]\t" << entry.path().filename().string() << '/' <<  NORMAL_TEXT << '\n';
+        }
+        else
+        {
+            std::cout << "[FILE]\t" << entry.path().filename().string() << '\n';
+        }
+    }
+    std::cout << std::endl;
+}
+
+void mkdirExec(){}
+void mvExec(){}
+
+void rmExec(){}
+
+void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString)
+{
+    if (!isValidArgs(argsString))
+    {
+        std::string args{};
+        std::getline(argsString, args);
+        utility::trimString(args);
+        std::cerr << RED_TEXT << "Error: " << args << " is not a valid arg" << NORMAL_TEXT << std::endl;
+        return;
+    }
+    std::string arg{};
+    while (argsString >> arg)
+    {
+        inputArgs.push_back(arg);
+    }
+}
+
+void touchExec()
+{
+}
+
+
