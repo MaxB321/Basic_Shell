@@ -15,4 +15,4 @@ extern void mkdirExec(std::istringstream& argsString);
 extern void mvExec();
 extern void rmExec();
 extern void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString);
-extern void touchExec();
+extern void touchExec(std::istringstream& argsString);

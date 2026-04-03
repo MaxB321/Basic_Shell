@@ -46,6 +46,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
             system("CLS");
             break;
         case static_cast<uint32_t>(commandsEnum::Touch):
+            touchExec(argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Mkdir):
             mkdirExec(argsString);
@@ -113,19 +114,19 @@ void lsExec()
 
 void mkdirExec(std::istringstream& argsString)
 {
-    std::string dirPath{currentPath};
+    std::filesystem::path dirPath{currentPath};
     std::string dirName{};
     argsString >> dirName;
-    dirPath = dirPath + '/' + dirName;
+    dirPath /= dirName;
 
-    if (!std::filesystem::exists(dirPath))
-    {
-        std::filesystem::create_directory(dirPath);
-    }
-    else
+    if (std::filesystem::exists(dirPath))
     {
         std::cerr << RED_TEXT << "Error: Directory [" << dirName << "] already exists" << NORMAL_TEXT << std::endl;
+        return;
+        
     }
+
+    std::filesystem::create_directory(dirPath);
 }
 
 void mvExec(){}
@@ -149,9 +150,20 @@ void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsStri
     }
 }
 
-void touchExec()
+void touchExec(std::istringstream& argsString)
 {
+    std::filesystem::path filePath{currentPath};
+    std::string fileName{};
+    argsString >> fileName;
+    filePath /= fileName;
 
+    if (std::filesystem::exists(filePath))
+    {
+        std::cerr << RED_TEXT << "Error: File [" << fileName << "] already exists" << NORMAL_TEXT << std::endl;
+        return;
+    }
+   
+    std::ofstream file(filePath, std::fstream::app);
 }
 
 
