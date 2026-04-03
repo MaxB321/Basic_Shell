@@ -17,3 +17,7 @@
 
 # changes and bugs doc
 todo.txt
+
+# test
+/test/
+test.*
