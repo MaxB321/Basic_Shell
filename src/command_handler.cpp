@@ -8,7 +8,32 @@
 std::string currentPath{std::getenv("USERPROFILE")};
 
 
-void catExec(){}
+void catExec(std::istringstream& argsString)
+{
+    std::filesystem::path filePath{currentPath};
+    std::string fileName{};
+    argsString >> fileName;
+    filePath /= fileName;
+
+    if (!std::filesystem::exists(filePath))
+    {
+        std::cerr << RED_TEXT << "Error: File [" << fileName << "] does not exist" << NORMAL_TEXT << std::endl;
+        return;
+    }
+    std::ifstream fileStream(filePath, std::ios::in);
+    if (!fileStream)
+    {
+        std::cerr << RED_TEXT << "Error: Failed to Open File [" << fileName << "]" << NORMAL_TEXT << std::endl;
+        return;
+    }
+    
+    std::string line{};
+    while (std::getline(fileStream, line))
+    {
+        std::cout << line << '\n';
+    }
+    std::cout << std::endl;
+}
 
 void cdExec(std::istringstream& argsString)
 {
@@ -54,6 +79,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
         case static_cast<uint32_t>(commandsEnum::Rm):
             break;
         case static_cast<uint32_t>(commandsEnum::Cat):
+            catExec(argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Grep):
             break;
@@ -163,7 +189,5 @@ void touchExec(std::istringstream& argsString)
         return;
     }
    
-    std::ofstream file(filePath, std::fstream::app);
+    std::ofstream file(filePath, std::ios::app);
 }
-
-

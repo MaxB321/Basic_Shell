@@ -2,7 +2,7 @@
 
 extern std::string currentPath;
 
-extern void catExec();
+extern void catExec(std::istringstream& argsString);
 extern void cdExec(std::istringstream& argsString);
 extern void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString); 
 extern void cpExec();

@@ -1,6 +1,11 @@
 #include "constants.h"
 
-
+const std::string_view cdArgs[] {
+    ".",
+    "..",
+    "/",
+    "./",
+};
 const std::string_view commands[] {
     "exit",
     "echo",
@@ -18,4 +23,4 @@ const std::string_view commands[] {
 };
 const std::string_view* commands_start{std::begin(commands)};
 const std::string_view* commands_end{std::end(commands)};
-
+const std::string_view rmRecFlag{"-r"};
