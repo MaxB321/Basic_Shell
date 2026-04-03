@@ -8,7 +8,7 @@
 std::string currentPath{std::getenv("USERPROFILE")};
 
 
-void catExec(){} 
+void catExec(){}
 
 void cdExec(std::istringstream& argsString)
 {
@@ -48,6 +48,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
         case static_cast<uint32_t>(commandsEnum::Touch):
             break;
         case static_cast<uint32_t>(commandsEnum::Mkdir):
+            mkdirExec(argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Rm):
             break;
@@ -91,7 +92,6 @@ bool isValidPath(std::string& path)
         std::cerr << e.what() << '\n';
         return false;
     }
-
     return true;
 }
 
@@ -111,7 +111,23 @@ void lsExec()
     std::cout << std::endl;
 }
 
-void mkdirExec(){}
+void mkdirExec(std::istringstream& argsString)
+{
+    std::string dirPath{currentPath};
+    std::string dirName{};
+    argsString >> dirName;
+    dirPath = dirPath + '/' + dirName;
+
+    if (!std::filesystem::exists(dirPath))
+    {
+        std::filesystem::create_directory(dirPath);
+    }
+    else
+    {
+        std::cerr << RED_TEXT << "Error: Directory [" << dirName << "] already exists" << NORMAL_TEXT << std::endl;
+    }
+}
+
 void mvExec(){}
 
 void rmExec(){}
@@ -135,6 +151,7 @@ void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsStri
 
 void touchExec()
 {
+
 }
 
 

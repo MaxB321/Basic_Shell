@@ -11,7 +11,7 @@ extern void grepExec();
 extern bool isValidArgs(std::istringstream& argsString);
 extern bool isValidPath(std::string& path);
 extern void lsExec();
-extern void mkdirExec();
+extern void mkdirExec(std::istringstream& argsString);
 extern void mvExec();
 extern void rmExec();
 extern void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString);
