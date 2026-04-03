@@ -10,6 +10,7 @@ int main()
 	std::string command{};
 	std::vector<std::string> inputArgs{};
 	inputArgs.reserve(5);
+	std::replace(currentPath.begin(), currentPath.end(), '\\', '/');
 
 	while (PROGRAM_RUNNING)
 	{

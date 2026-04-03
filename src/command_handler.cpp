@@ -19,6 +19,7 @@ void cdExec(std::istringstream& argsString)
         return;
 
     currentPath = argPath;
+    std::replace(currentPath.begin(), currentPath.end(), '\\', '/');
 }
 
 void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
