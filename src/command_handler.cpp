@@ -8,11 +8,11 @@
 std::string currentPath{std::getenv("USERPROFILE")};
 
 
-void catExec(std::istringstream& argsString)
+void catExec(std::istringstream& argsStringStream)
 {
     std::filesystem::path filePath{currentPath};
     std::string fileName{};
-    argsString >> fileName;
+    argsStringStream >> fileName;
     filePath /= fileName;
 
     if (!std::filesystem::exists(filePath))
@@ -35,10 +35,10 @@ void catExec(std::istringstream& argsString)
     std::cout << std::endl;
 }
 
-void cdExec(uint32_t& commandIndex, std::istringstream& argsString)
+void cdExec(uint32_t& commandIndex, std::istringstream& argsStringStream)
 {
     std::string arg{};
-    std::getline(argsString, arg);
+    std::getline(argsStringStream, arg);
     utility::trimString(arg);
 
     if (isValidArgs(commandIndex, arg))
@@ -61,13 +61,38 @@ void cdExec(uint32_t& commandIndex, std::istringstream& argsString)
     std::string& argPath{arg};
 
     if (!isValidPath(argPath))
+    {
+        if ((argPath[0] == '.') && (argPath[1] == '/'))
+        {
+            argPath.erase(0, 2);
+            currentPath.append("/");
+            currentPath.append(argPath);
+
+            if (currentPath.back() == '/')
+                currentPath.pop_back();
+
+            return;
+        }
+
+        std::string tempPath{currentPath + '/' + argPath};
+        if (isValidPath(tempPath))
+        {
+            currentPath = tempPath;
+            return;
+        }
+
+        std::cerr << RED_TEXT << "Error: " << argPath << " is not a valid path." << NORMAL_TEXT << std::endl;
         return;
+    }    
 
     currentPath = argPath;
     std::replace(currentPath.begin(), currentPath.end(), '\\', '/');
+    
+    if (currentPath.back() == '/')
+        currentPath.pop_back();
 }
 
-void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
+void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
 {
     switch (commandIndex)
     {
@@ -75,13 +100,13 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
             PROGRAM_RUNNING = false;
             break;
         case static_cast<uint32_t>(commandsEnum::Echo):
-            echoExec(argsString);
+            echoExec(argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Pwd):
             std::cout << "Path: " << currentPath << '\n';
             break;
         case static_cast<uint32_t>(commandsEnum::Cd):
-            cdExec(commandIndex, argsString);
+            cdExec(commandIndex, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Ls):
             lsExec();
@@ -90,18 +115,18 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
             system("CLS");
             break;
         case static_cast<uint32_t>(commandsEnum::Touch):
-            touchExec(argsString);
+            touchExec(argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Mkdir):
-            mkdirExec(argsString);
+            mkdirExec(argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Rm):
             break;
         case static_cast<uint32_t>(commandsEnum::Cat):
-            catExec(argsString);
+            catExec(argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Grep):
-            grepExec(commandIndex, inputArgs, argsString);
+            grepExec(commandIndex, inputArgs, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Cp):
             break;
@@ -112,18 +137,20 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
 
 void cpExec(){}
 
-void echoExec(std::istringstream& argsString)
+void echoExec(std::istringstream& argsStringStream)
 {
     std::string echoOutput{};
-	std::getline(argsString, echoOutput);
+	std::getline(argsStringStream, echoOutput);
     utility::trimString(echoOutput);
 
     std::cout << echoOutput << '\n';
 }
 
-void grepExec(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
+void grepExec(uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
 {
-    setArgVec(commandIndex, inputArgs, argsString);
+    std::string args{};
+    std::getline(argsStringStream, args);
+    setArgVec(commandIndex, inputArgs, args);
 
 }
 
@@ -138,7 +165,7 @@ bool isValidArgs(uint32_t& commandIndex, std::string& argsString)
 
         return true;
     }
-    else if (commandIndex == static_cast<uint32_t>(commandsEnum::Cd))
+    else if (commandIndex == static_cast<uint32_t>(commandsEnum::Rm))
     {
         if (static_cast<std::string_view>(argsString) != rmRecFlag)
             return false;
@@ -165,7 +192,6 @@ bool isValidPath(std::string& path)
     }
     catch(const std::exception& e)
     {
-        std::cerr << e.what() << '\n';
         return false;
     }
     return true;
@@ -187,11 +213,11 @@ void lsExec()
     std::cout << std::endl;
 }
 
-void mkdirExec(std::istringstream& argsString)
+void mkdirExec(std::istringstream& argsStringStream)
 {
     std::filesystem::path dirPath{currentPath};
     std::string dirName{};
-    argsString >> dirName;
+    argsStringStream >> dirName;
     dirPath /= dirName;
 
     if (std::filesystem::exists(dirPath))
@@ -208,31 +234,21 @@ void mvExec(){}
 
 void rmExec(){}
 
-void setArgVec(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
-{
-    std::string args{};
-    std::getline(argsString, args);
-
-    if (!isValidArgs(commandIndex, args))
-    {
-        std::string args{};
-        std::getline(argsString, args);
-        utility::trimString(args);
-        std::cerr << RED_TEXT << "Error: " << args << " is not a valid arg" << NORMAL_TEXT << std::endl;
-        return;
-    }
+void setArgVec(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::string& argsString)
+{    
+    std::istringstream args{argsString};
     std::string arg{};
-    while (argsString >> arg)
+    while (args >> arg)
     {
         inputArgs.push_back(arg);
     }
 }
 
-void touchExec(std::istringstream& argsString)
+void touchExec(std::istringstream& argsStringStream)
 {
     std::filesystem::path filePath{currentPath};
     std::string fileName{};
-    argsString >> fileName;
+    argsStringStream >> fileName;
     filePath /= fileName;
 
     if (std::filesystem::exists(filePath))

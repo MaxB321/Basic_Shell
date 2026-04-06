@@ -3,8 +3,7 @@
 const std::string_view cdArgs[] {
     ".",
     "..",
-    "/",
-    "./"
+    "/"
 };
 const std::string_view commands[] {
     "exit",
