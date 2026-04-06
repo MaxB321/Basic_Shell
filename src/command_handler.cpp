@@ -64,20 +64,14 @@ void cdExec(uint32_t& commandIndex, std::istringstream& argsStringStream)
     {
         if ((argPath[0] == '.') && (argPath[1] == '/'))
         {
-            argPath.erase(0, 2);
-            currentPath.append("/");
-            currentPath.append(argPath);
-
-            if (currentPath.back() == '/')
-                currentPath.pop_back();
-
+            handleRelativePathing(argPath);
             return;
         }
 
         std::string tempPath{currentPath + '/' + argPath};
         if (isValidPath(tempPath))
         {
-            currentPath = tempPath;
+            handleRelativePathing(tempPath);
             return;
         }
 
@@ -88,8 +82,16 @@ void cdExec(uint32_t& commandIndex, std::istringstream& argsStringStream)
     currentPath = argPath;
     std::replace(currentPath.begin(), currentPath.end(), '\\', '/');
     
+    std::filesystem::path pathObj{currentPath};
+    if (pathObj.parent_path() == pathObj.root_path())
+    {
+        if (currentPath.substr(2, 2) == "//")
+            currentPath.erase(3, 1);
+    }
+    
     if (currentPath.back() == '/')
         currentPath.pop_back();
+    
 }
 
 void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
@@ -152,6 +154,43 @@ void grepExec(uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::
     std::getline(argsStringStream, args);
     setArgVec(commandIndex, inputArgs, args);
 
+}
+
+void handleRelativePathing(std::string& path)
+{
+    std::string tempPath{currentPath};
+
+    if ((path[0] == '.') && (path[1] == '/'))
+    {
+        path.erase(0, 2);
+        tempPath.append("/");
+        tempPath.append(path);
+
+        if (!isValidPath(tempPath))
+        {
+            std::cerr << RED_TEXT << "Error: " << tempPath << " is not a valid path." << NORMAL_TEXT << std::endl;
+            return;
+        }
+
+        currentPath = tempPath;
+        if (currentPath.back() == '/')
+            currentPath.pop_back();
+    }
+
+    if (isValidPath(path))
+    {
+        currentPath = path;
+
+        if (currentPath.back() == '/')
+            currentPath.pop_back();
+    }
+
+    std::filesystem::path pathObj{currentPath};
+    if (pathObj.parent_path() == pathObj.root_path())
+    {
+        if (currentPath.substr(2, 2) == "//")
+            currentPath.erase(3, 1);
+    }
 }
 
 bool isValidArgs(uint32_t& commandIndex, std::string& argsString)

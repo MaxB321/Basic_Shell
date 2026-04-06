@@ -8,6 +8,7 @@ extern void commandHandler(uint32_t commandIndex, std::vector<std::string>& inpu
 extern void cpExec();
 extern void echoExec(std::istringstream& argsStringStream);
 extern void grepExec(uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream);
+extern void handleRelativePathing(std::string& path);
 extern bool isValidArgs(uint32_t& commandIndex, std::string& argsString);
 extern bool isValidPath(std::string& path);
 extern void lsExec();
