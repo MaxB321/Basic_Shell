@@ -20,15 +20,15 @@ int main()
 		inputStream >> command;
 		std::istringstream& argsString{inputStream};
 
-		auto arr_it{std::find(commands_start, commands_end, command)};
+		auto arr_it{std::find(std::begin(commands), std::end(commands), command)};
 
-		if (arr_it == commands_end)
+		if (arr_it == std::end(commands))
 		{
 			std::cerr << RED_TEXT << "Error: " << userInput << " is not a valid command" << NORMAL_TEXT << std::endl;
 		}
 		else
 		{
-			uint32_t command_index = static_cast<uint32_t>(arr_it - commands_start);
+			uint32_t command_index = static_cast<uint32_t>(arr_it - std::begin(commands));
 			commandHandler(command_index, inputArgs, argsString);
 		}
 		inputArgs.clear();

@@ -4,7 +4,7 @@ const std::string_view cdArgs[] {
     ".",
     "..",
     "/",
-    "./",
+    "./"
 };
 const std::string_view commands[] {
     "exit",
@@ -21,6 +21,9 @@ const std::string_view commands[] {
     "cp",
     "mv"
 };
-const std::string_view* commands_start{std::begin(commands)};
-const std::string_view* commands_end{std::end(commands)};
+const std::string_view grepArgs[] {
+    "-i",
+    "-r",
+};
+const std::string_view lsAllFlag{"-a"};
 const std::string_view rmRecFlag{"-r"};

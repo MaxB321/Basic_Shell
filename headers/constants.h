@@ -10,8 +10,8 @@
 #define CYAN_TEXT  "\033[96m"
 
 
-extern const std::string_view cdArgs[];
-extern const std::string_view commands[];
-extern const std::string_view* commands_start;
-extern const std::string_view* commands_end;
+extern const std::string_view cdArgs[4];
+extern const std::string_view commands[13];
+extern const std::string_view grepArgs[2];
+extern const std::string_view lsAllFlag;
 extern const std::string_view rmRecFlag;

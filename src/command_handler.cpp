@@ -35,11 +35,30 @@ void catExec(std::istringstream& argsString)
     std::cout << std::endl;
 }
 
-void cdExec(std::istringstream& argsString)
+void cdExec(uint32_t& commandIndex, std::istringstream& argsString)
 {
-    std::string argPath{};
-    std::getline(argsString, argPath);
-    utility::trimString(argPath);
+    std::string arg{};
+    std::getline(argsString, arg);
+    utility::trimString(arg);
+
+    if (isValidArgs(commandIndex, arg))
+    {
+        std::filesystem::path curPath{currentPath};
+        if ((arg == "..") && curPath.has_parent_path())
+        {
+            std::filesystem::path parentPath{curPath.parent_path()};
+            currentPath = parentPath.string();
+        }
+        else if (arg == "/" && curPath.has_root_path())
+        {
+            std::filesystem::path rootPath{curPath.root_path()};
+            currentPath = rootPath.string();
+        }
+
+        return;
+    }
+
+    std::string& argPath{arg};
 
     if (!isValidPath(argPath))
         return;
@@ -62,7 +81,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
             std::cout << "Path: " << currentPath << '\n';
             break;
         case static_cast<uint32_t>(commandsEnum::Cd):
-            cdExec(argsString);
+            cdExec(commandIndex, argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Ls):
             lsExec();
@@ -82,6 +101,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
             catExec(argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Grep):
+            grepExec(commandIndex, inputArgs, argsString);
             break;
         case static_cast<uint32_t>(commandsEnum::Cp):
             break;
@@ -101,10 +121,39 @@ void echoExec(std::istringstream& argsString)
     std::cout << echoOutput << '\n';
 }
 
-void grepExec(){}
-
-bool isValidArgs(std::istringstream& argsString)
+void grepExec(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
 {
+    setArgVec(commandIndex, inputArgs, argsString);
+
+}
+
+bool isValidArgs(uint32_t& commandIndex, std::string& argsString)
+{
+
+    if (commandIndex == static_cast<uint32_t>(commandsEnum::Cd))
+    {
+        auto arr_it{std::find(std::begin(cdArgs), std::end(cdArgs), static_cast<std::string_view>(argsString))};
+        if (arr_it == std::end(cdArgs))
+            return false;
+
+        return true;
+    }
+    else if (commandIndex == static_cast<uint32_t>(commandsEnum::Cd))
+    {
+        if (static_cast<std::string_view>(argsString) != rmRecFlag)
+            return false;
+
+        return true;
+    }
+    else if (commandIndex == static_cast<uint32_t>(commandsEnum::Grep))
+    {
+        auto arr_it{std::find(std::begin(grepArgs), std::end(grepArgs), static_cast<std::string_view>(argsString))};
+        if (arr_it == std::end(grepArgs))
+            return false;
+
+        return true;
+    }
+
     return true;
 }
 
@@ -159,9 +208,12 @@ void mvExec(){}
 
 void rmExec(){}
 
-void setArgVec(std::vector<std::string>& inputArgs, std::istringstream& argsString)
+void setArgVec(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsString)
 {
-    if (!isValidArgs(argsString))
+    std::string args{};
+    std::getline(argsString, args);
+
+    if (!isValidArgs(commandIndex, args))
     {
         std::string args{};
         std::getline(argsString, args);

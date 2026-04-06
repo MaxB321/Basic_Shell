@@ -13,7 +13,7 @@ Featured Commands:
   8. mkdir
   9. rm       - NOT DONE
   10. rm -r   - NOT DONE
-  11. cat     - NOT DONE
+  11. cat
   12. grep    - NOT DONE
   13. cp      - NOT DONE
   14. mv      - NOT DONE
