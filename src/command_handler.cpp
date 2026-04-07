@@ -35,7 +35,7 @@ void catExec(std::istringstream& argsStringStream)
     std::cout << std::endl;
 }
 
-void cdExec(uint32_t& commandIndex, std::istringstream& argsStringStream)
+void cdExec(const uint32_t& commandIndex, std::istringstream& argsStringStream)
 {
     std::string arg{};
     std::getline(argsStringStream, arg);
@@ -102,7 +102,7 @@ void cdExec(uint32_t& commandIndex, std::istringstream& argsStringStream)
     
 }
 
-void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
+void commandHandler(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
 {
     switch (commandIndex)
     {
@@ -131,6 +131,7 @@ void commandHandler(uint32_t commandIndex, std::vector<std::string>& inputArgs, 
             mkdirExec(argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Rm):
+            rmExec(commandIndex, inputArgs, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Cat):
             catExec(argsStringStream);
@@ -156,24 +157,21 @@ void echoExec(std::istringstream& argsStringStream)
     std::cout << echoOutput << '\n';
 }
 
-void grepExec(uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
+void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
 {
     std::string argsString{};
     std::getline(argsStringStream, argsString);
-    std::stringstream argStream{argsString};
-    setArgVec(commandIndex, argsString, inputArgs);
+    setArgVec(argsString, inputArgs);
 
     if (!isValidArgs(commandIndex, inputArgs))
     {
-        std::cout << "not valid arg\n";
+        std::cerr << RED_TEXT << "Error: " << argsString << " is not a valid argument(s)." << NORMAL_TEXT << std::endl;
         return;
     }
     for (std::string& element : inputArgs)
     {
         std::cout << element << '\n';
     }
-    
-
     
 }
 
@@ -214,9 +212,8 @@ void handleRelativePathing(std::string& path)
     }
 }
 
-bool isValidArgs(uint32_t& commandIndex, std::string& argsString)
+bool isValidArgs(const uint32_t& commandIndex, std::string& argsString)
 {
-
     if (commandIndex == static_cast<uint32_t>(commandsEnum::Cd))
     {
         auto arr_it{std::find(std::begin(cdArgs), std::end(cdArgs), static_cast<std::string_view>(argsString))};
@@ -238,8 +235,32 @@ bool isValidArgs(uint32_t& commandIndex, std::string& argsString)
     return true;
 }
 
-bool isValidArgs(uint32_t& commandIndex, std::vector<std::string>& inputArgs)
+bool isValidArgs(const uint32_t& commandIndex, std::vector<std::string>& inputArgs)
 {
+    if (commandIndex == static_cast<uint32_t>(commandsEnum::Cd))
+    {
+        for (std::string_view element : inputArgs)
+        {
+            auto arr_it{std::find(std::begin(cdArgs), std::end(cdArgs), static_cast<std::string_view>(element))};
+            if (arr_it == std::end(cdArgs))
+                return false;
+        }  
+    }
+    else if (commandIndex == static_cast<uint32_t>(commandsEnum::Rm))
+    {
+        if (static_cast<std::string_view>(inputArgs[0]) != rmRecFlag)
+            return false;
+    }
+    else if (commandIndex == static_cast<uint32_t>(commandsEnum::Grep))
+    {
+        for (std::string_view element : inputArgs)
+        {
+            auto arr_it{std::find(std::begin(grepArgs), std::end(grepArgs), static_cast<std::string_view>(element))};
+            if (arr_it == std::end(grepArgs))
+                return false;
+        }
+    }
+
     return true;
 }
 
@@ -287,15 +308,74 @@ void mkdirExec(std::istringstream& argsStringStream)
 
 void mvExec(){}
 
-void rmExec(){}
-
-void setArgVec(uint32_t commandIndex, std::string& argsString, std::vector<std::string>& inputArgs)
-{    
-    std::istringstream args{argsString};
-    std::string arg{};
-    while (args >> arg)
+void rmExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
+{
+    std::string argsString{};
+    std::getline(argsStringStream, argsString);
+    setArgVec(argsString, inputArgs);
+    
+    // recursive rm
+    if (isValidArgs(commandIndex, inputArgs))
     {
-        inputArgs.push_back(arg);
+        std::filesystem::directory_entry recEntry{currentPath + '/' + inputArgs[1]};
+        
+        if (std::filesystem::exists(recEntry))
+        {
+            std::filesystem::remove_all(recEntry);
+            return;
+        }
+
+        std::cerr << RED_TEXT << "Error: File/Dir [" << recEntry << "] does not exist." << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    std::filesystem::directory_entry entry{currentPath + '/' + inputArgs[0]};
+    if (std::filesystem::exists(entry))
+    {
+        if (std::filesystem::is_regular_file(entry))
+        {
+            std::filesystem::remove(entry);
+            return;
+        }
+        if (std::filesystem::is_directory(entry) && std::filesystem::is_empty(entry))
+        {
+            std::filesystem::remove(entry);
+            return;
+        }
+        else if (std::filesystem::is_directory(entry) && !std::filesystem::is_empty(entry))
+        {
+            std::cerr << RED_TEXT << "Error: Dir [" << entry << "] is not empty. Use -r flag." << NORMAL_TEXT << std::endl;
+            return;
+        }
+    }
+    std::cerr << RED_TEXT << "Error: File/Dir [" << entry << "] does not exist." << NORMAL_TEXT << std::endl;
+}
+
+void setArgVec(std::string& argsString, std::vector<std::string>& inputArgs)
+{    
+    std::istringstream argsStream{argsString};
+    std::string arg{};
+    char ch{};
+
+    while (argsStream >> ch)
+    {
+        if (ch == '"')
+        {
+            arg.clear();
+            while (argsStream.get(ch) && ch != '"')
+                arg += ch;
+
+            inputArgs.push_back(arg);
+        }
+        else
+        {
+            arg = ch;
+            while (argsStream.get(ch) && ch != ' ' && ch != '\t')
+                arg += ch;
+
+            inputArgs.push_back(arg);
+        }
+        
     }
 }
 
