@@ -81,8 +81,16 @@ void cdExec(uint32_t& commandIndex, std::istringstream& argsStringStream)
 
     currentPath = argPath;
     std::replace(currentPath.begin(), currentPath.end(), '\\', '/');
-    
     std::filesystem::path pathObj{currentPath};
+
+    if (currentPath == pathObj.root_path())
+    {
+        if (currentPath.back() != '/')
+            currentPath.push_back('/');
+
+        return;
+    }
+    
     if (pathObj.parent_path() == pathObj.root_path())
     {
         if (currentPath.substr(2, 2) == "//")
@@ -150,10 +158,23 @@ void echoExec(std::istringstream& argsStringStream)
 
 void grepExec(uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
 {
-    std::string args{};
-    std::getline(argsStringStream, args);
-    setArgVec(commandIndex, inputArgs, args);
+    std::string argsString{};
+    std::getline(argsStringStream, argsString);
+    std::stringstream argStream{argsString};
+    setArgVec(commandIndex, argsString, inputArgs);
 
+    if (!isValidArgs(commandIndex, inputArgs))
+    {
+        std::cout << "not valid arg\n";
+        return;
+    }
+    for (std::string& element : inputArgs)
+    {
+        std::cout << element << '\n';
+    }
+    
+
+    
 }
 
 void handleRelativePathing(std::string& path)
@@ -201,38 +222,33 @@ bool isValidArgs(uint32_t& commandIndex, std::string& argsString)
         auto arr_it{std::find(std::begin(cdArgs), std::end(cdArgs), static_cast<std::string_view>(argsString))};
         if (arr_it == std::end(cdArgs))
             return false;
-
-        return true;
     }
     else if (commandIndex == static_cast<uint32_t>(commandsEnum::Rm))
     {
         if (static_cast<std::string_view>(argsString) != rmRecFlag)
             return false;
-
-        return true;
     }
     else if (commandIndex == static_cast<uint32_t>(commandsEnum::Grep))
     {
         auto arr_it{std::find(std::begin(grepArgs), std::end(grepArgs), static_cast<std::string_view>(argsString))};
         if (arr_it == std::end(grepArgs))
             return false;
-
-        return true;
     }
 
     return true;
 }
 
+bool isValidArgs(uint32_t& commandIndex, std::vector<std::string>& inputArgs)
+{
+    return true;
+}
+
 bool isValidPath(std::string& path)
 {
-    try
-    {
-        std::filesystem::current_path(path);
-    }
-    catch(const std::exception& e)
-    {
+    std::filesystem::path tempPath{path};
+    if (!std::filesystem::exists(tempPath))
         return false;
-    }
+
     return true;
 }
 
@@ -273,7 +289,7 @@ void mvExec(){}
 
 void rmExec(){}
 
-void setArgVec(uint32_t commandIndex, std::vector<std::string>& inputArgs, std::string& argsString)
+void setArgVec(uint32_t commandIndex, std::string& argsString, std::vector<std::string>& inputArgs)
 {    
     std::istringstream args{argsString};
     std::string arg{};
