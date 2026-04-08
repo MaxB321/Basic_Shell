@@ -14,3 +14,9 @@ void utility::trimString(std::string& string)
         string = string.substr(strStart, strEnd - strStart + 1);
     }
 }
+
+void utility::toLowerString(std::string& string)
+{
+    for (char& ch : string)
+        ch = std::tolower(static_cast<unsigned char>(ch));
+}
