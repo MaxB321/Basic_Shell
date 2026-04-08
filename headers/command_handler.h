@@ -15,6 +15,7 @@ extern bool isValidPath(std::string& path);
 extern void lsExec();
 extern void mkdirExec(std::istringstream& argsStringStream);
 extern void mvExec();
+extern uint32_t parseFileString(const std::string& fileName, const std::string& target);
 extern void rmExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream);
 extern void setArgVec(std::string& argsString, std::vector<std::string>& inputArgs);
 extern void touchExec(std::istringstream& argsStringStream);

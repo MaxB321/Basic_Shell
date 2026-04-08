@@ -162,17 +162,45 @@ void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs,
     std::string argsString{};
     std::getline(argsStringStream, argsString);
     setArgVec(argsString, inputArgs);
-
-    if (!isValidArgs(commandIndex, inputArgs))
+    if (inputArgs.size() < 2)
     {
-        std::cerr << RED_TEXT << "Error: " << argsString << " is not a valid argument(s)." << NORMAL_TEXT << std::endl;
+        utility::trimString(argsString);
+        std::cerr << RED_TEXT << "(" << argsString << ") is not a valid argument" << NORMAL_TEXT << std::endl;
         return;
     }
-    for (std::string& element : inputArgs)
+
+    if (isValidArgs(commandIndex, inputArgs[0]))
     {
-        std::cout << element << '\n';
+        // handle if both flags passed here
+        if (isValidArgs(commandIndex, inputArgs[1]))
+        {
+
+            return;
+        }
+        // handle if one flag passed here
+
+        return;
     }
     
+    // handle no flags here
+    
+    std::string& targetString{inputArgs[0]};
+    std::string& fileName{inputArgs[1]};
+    std::string filePath{currentPath + '/' + fileName};
+    if (std::filesystem::exists(filePath))
+    {
+        uint32_t lineNumber{parseFileString(fileName, targetString)};
+        if (lineNumber > 0)
+        {
+            std::cout << targetString << "\tline: " << lineNumber <<  "; File: [" << fileName << "]" << '\n';
+        }
+        else
+        {
+            std::cout << targetString << " not found\n";
+        }
+        return;
+    }
+    std::cerr << RED_TEXT << "Error: [" << fileName << "] does not exist." << NORMAL_TEXT << std::endl;
 }
 
 void handleRelativePathing(std::string& path)
@@ -307,6 +335,22 @@ void mkdirExec(std::istringstream& argsStringStream)
 }
 
 void mvExec(){}
+
+uint32_t parseFileString(const std::string& fileName, const std::string& target)
+{
+    uint32_t lineNumber{0};
+    std::ifstream file(currentPath + '/' + fileName);
+    std::string line{};
+
+    while (std::getline(file, line))
+    {
+        ++lineNumber;
+        if (line.find(target) != std::string::npos) 
+            return lineNumber;
+    }
+    lineNumber = 0;
+    return lineNumber;
+}
 
 void rmExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
 {
