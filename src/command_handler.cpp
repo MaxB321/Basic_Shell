@@ -174,12 +174,9 @@ void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs,
         // both flags passed 
         if (isValidArgs(commandIndex, inputArgs[1]))
         {
-            std::string& flag1{inputArgs[0]};
-            std::string& flag2{inputArgs[1]};
             std::string& targetString{inputArgs[2]};
             std::string& fileName{inputArgs[3]};
-
-
+            grepWithArgs(targetString, fileName);
 
             return;
         }
@@ -188,29 +185,7 @@ void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs,
         std::string& flag1{inputArgs[0]};
         std::string& targetString{inputArgs[1]};
         std::string& fileName{inputArgs[2]};
-        std::string filePath{currentPath + '/' + fileName};
-
-        if (flag1 == "-i")
-        {
-            if (std::filesystem::exists(filePath))
-            {
-                uint32_t lineNumber{parseFileString(fileName, targetString, true)};
-                if (lineNumber > 0)
-                {
-                    std::cout << targetString << "\tline: " << lineNumber <<  "; File: [" << fileName << "]" << '\n';
-                }
-                else
-                {
-                    std::cout << targetString << " not found\n";
-                }
-                return;
-            }
-            std::cerr << RED_TEXT << "Error: [" << fileName << "] does not exist." << NORMAL_TEXT << std::endl;
-        }
-        else if (flag1 == "-r")
-        {
-
-        }
+        grepWithArgs(flag1, targetString, fileName);      
 
         return;
     }
@@ -218,20 +193,93 @@ void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs,
     std::string& targetString{inputArgs[0]};
     std::string& fileName{inputArgs[1]};
     std::string filePath{currentPath + '/' + fileName};
-    if (std::filesystem::exists(filePath))
+
+    if (!std::filesystem::exists(filePath))
     {
-        uint32_t lineNumber{parseFileString(fileName, targetString, false)};
-        if (lineNumber > 0)
-        {
-            std::cout << targetString << "\tline: " << lineNumber <<  "; File: [" << fileName << "]" << '\n';
-        }
-        else
-        {
-            std::cout << targetString << " not found\n";
-        }
+        std::cerr << RED_TEXT << "Error: [" << fileName << "] does not exist." << NORMAL_TEXT << std::endl;
         return;
     }
-    std::cerr << RED_TEXT << "Error: [" << fileName << "] does not exist." << NORMAL_TEXT << std::endl;
+
+    if (std::filesystem::is_regular_file(filePath))
+    {
+        parseFileString(fileName, targetString, false);
+        return;
+    }
+    if (std::filesystem::is_directory(filePath))
+    {
+        std::cerr << RED_TEXT << "Error: [" << fileName << "] is a directory." << NORMAL_TEXT << std::endl;
+        return;
+    }
+}
+
+void grepWithArgs(const std::string& flag, std::string& targetString, const std::string& fileName)
+{
+    std::string filePath{currentPath + '/' + fileName};
+
+    if (flag == "-i")
+    {
+        if (!std::filesystem::exists(filePath))
+        {
+            std::cerr << RED_TEXT << "Error: [" << fileName << "] does not exist." << NORMAL_TEXT << std::endl;
+            return;
+        }
+
+        if (std::filesystem::is_regular_file(filePath))
+        {
+            parseFileString(fileName, targetString, true);
+            return;
+        }
+        if (std::filesystem::is_directory(filePath))
+        {
+            std::cerr << RED_TEXT << "Error: [" << fileName << "] is a directory." << NORMAL_TEXT << std::endl;
+            return;
+        }
+
+        return;   
+    }
+
+    // recursive flag solution
+    if (!std::filesystem::exists(filePath))
+    {
+        std::cerr << RED_TEXT << "Error: [" << fileName << "] does not exist." << NORMAL_TEXT << std::endl;
+        return;
+    }  
+
+    if (std::filesystem::is_regular_file(filePath))
+    {
+        parseFileStringRec(fileName, targetString, false);
+        return;
+    }
+    if (std::filesystem::is_directory(filePath))
+    {
+        
+    }
+    std::cerr << RED_TEXT << "Error: [" << fileName << "] is not a file or directory." << NORMAL_TEXT << std::endl;
+    
+
+}
+
+// Case Insensitive and Recursive Solution
+void grepWithArgs(std::string& targetString, const std::string& fileName)
+{
+    std::string filePath{currentPath + '/' + fileName};
+    if (!std::filesystem::exists(filePath))
+    {
+        std::cerr << RED_TEXT << "Error: [" << fileName << "] does not exist." << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    if (std::filesystem::is_regular_file(filePath))
+    {
+        parseFileStringRec(fileName, targetString, true);
+        return;
+    }
+    if (std::filesystem::is_directory(filePath))
+    {
+        parseDirStringRec(fileName, targetString, true);
+        return;
+    }
+    std::cerr << RED_TEXT << "Error: [" << fileName << "] is not a file or directory." << NORMAL_TEXT << std::endl;
 }
 
 void handleRelativePathing(std::string& path)
@@ -367,7 +415,7 @@ void mkdirExec(std::istringstream& argsStringStream)
 
 void mvExec(){}
 
-uint32_t parseFileString(const std::string& fileName, std::string& target, const bool caseSensitive)
+void parseFileString(const std::string& fileName, std::string& target, const bool caseSensitive)
 {
     uint32_t lineNumber{0};
     std::ifstream file(currentPath + '/' + fileName);
@@ -378,23 +426,85 @@ uint32_t parseFileString(const std::string& fileName, std::string& target, const
         while (std::getline(file, line))
         {
             ++lineNumber;
+
             if (line.find(target) != std::string::npos) 
-                return lineNumber;
+            {
+                utility::trimString(line);
+                std::cout << line << "\tline: " << lineNumber <<  "; File: [" << fileName << "]" << '\n';
+                return;
+            }
         }
 
-        return static_cast<uint32_t>(0);
+        std::cout << target << " not found.\n";
+        return;
     }
 
     utility::toLowerString(target);
     while (std::getline(file, line))
     {
-        utility::toLowerString(line);
         ++lineNumber;
+        utility::toLowerString(line);
         if (line.find(target) != std::string::npos) 
-            return lineNumber;
+        {
+            utility::trimString(line);
+            std::cout << line << "\tline: " << lineNumber <<  "; File: [" << fileName << "]" << '\n';
+            return;
+        }
     }
-    
-    return static_cast<uint32_t>(0);
+
+    std::cout << target << " not found.\n";
+    return;
+}
+
+void parseFileStringRec(const std::string& fileName, std::string& target, const bool caseSensitive)
+{
+    uint32_t lineNumber{0};
+    uint32_t prevLineNumber{0};
+    std::ifstream file(currentPath + '/' + fileName);
+    std::string line{};
+
+    if (!caseSensitive)
+    {
+        while (std::getline(file, line))
+        {
+            ++lineNumber;
+
+            if (line.find(target) != std::string::npos) 
+            {
+                prevLineNumber = lineNumber;
+                utility::trimString(line);
+                std::cout << line << "\tline: " << lineNumber <<  "; File: [" << fileName << "]" << '\n';
+            }
+        }
+        if (prevLineNumber > 0)
+            return;
+
+        std::cout << target << " not found.\n";
+        return;
+    }
+
+    utility::toLowerString(target);
+    while (std::getline(file, line))
+    {
+        ++lineNumber;
+        utility::toLowerString(line);
+        if (line.find(target) != std::string::npos) 
+        {
+            prevLineNumber = lineNumber;
+            utility::trimString(line);
+            std::cout << line << "\tline: " << lineNumber <<  "; File: [" << fileName << "]" << '\n';
+        }
+    }
+    if (prevLineNumber > 0)
+        return;
+
+    std::cout << target << " not found.\n";
+    return;
+}
+
+void parseDirStringRec(const std::string& fileName, std::string& target, const bool caseSensitive)
+{
+
 }
 
 void rmExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
