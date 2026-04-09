@@ -14,6 +14,6 @@ Featured Commands:
   9. rm      
   10. rm -r 
   11. cat
-  12. grep    - NOT DONE
+  12. grep    
   13. cp      - NOT DONE
   14. mv      - NOT DONE

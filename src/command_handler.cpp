@@ -174,6 +174,12 @@ void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs,
         // both flags passed 
         if (isValidArgs(commandIndex, inputArgs[1]))
         {
+            if (inputArgs.size() < 4)
+            {
+                utility::trimString(argsString);
+                std::cerr << RED_TEXT << "(" << argsString << ") is not a valid argument" << NORMAL_TEXT << std::endl;
+                return;
+            }
             std::string& targetString{inputArgs[2]};
             std::string& fileName{inputArgs[3]};
             grepWithArgs(targetString, fileName);
@@ -182,6 +188,12 @@ void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs,
         }
 
         // one flag passed 
+        if (inputArgs.size() < 3)
+        {
+            utility::trimString(argsString);
+            std::cerr << RED_TEXT << "(" << argsString << ") is not a valid argument" << NORMAL_TEXT << std::endl;
+            return;
+        }
         std::string& flag1{inputArgs[0]};
         std::string& targetString{inputArgs[1]};
         std::string& fileName{inputArgs[2]};
@@ -189,7 +201,7 @@ void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs,
 
         return;
     }
-    
+
     std::string& targetString{inputArgs[0]};
     std::string& fileName{inputArgs[1]};
     std::string filePath{currentPath + '/' + fileName};
@@ -252,7 +264,8 @@ void grepWithArgs(const std::string& flag, std::string& targetString, const std:
     }
     if (std::filesystem::is_directory(filePath))
     {
-        
+        parseDirStringRec(fileName, targetString, false);
+        return;
     }
     std::cerr << RED_TEXT << "Error: [" << fileName << "] is not a file or directory." << NORMAL_TEXT << std::endl;
     
@@ -502,9 +515,65 @@ void parseFileStringRec(const std::string& fileName, std::string& target, const 
     return;
 }
 
-void parseDirStringRec(const std::string& fileName, std::string& target, const bool caseSensitive)
+void parseDirStringRec(const std::string& dirName, std::string& target, const bool caseSensitive)
 {
+    uint32_t lineNumber{0};
+    bool targetFound{};
+    std::string directory{currentPath + '/' + dirName};
+    std::ifstream file{};
+    std::string line{};
 
+    if (!caseSensitive)
+    {
+        for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(directory))
+        {
+            lineNumber = 0;
+            file.open(entry.path());
+            while (std::getline(file, line))
+            {
+                ++lineNumber;
+
+                if (line.find(target) != std::string::npos) 
+                {
+                    targetFound = true;
+                    utility::trimString(line);
+                    std::cout << line << "\tline: " << lineNumber <<  "; File: [" << entry.path().filename().string() << "]" << '\n';
+                }
+            }
+            file.close();
+            file.clear();
+        }
+        if (targetFound)
+            return;
+
+        std::cout << target << " not found.\n";
+        return;
+    }
+
+    utility::toLowerString(target);
+    for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(directory))
+    {
+        lineNumber = 0;
+        file.open(entry.path());
+        while (std::getline(file, line))
+        {
+            ++lineNumber;
+            utility::toLowerString(line);
+            if (line.find(target) != std::string::npos) 
+            {
+                targetFound = true;
+                utility::trimString(line);
+                std::cout << line << "\tline: " << lineNumber <<  "; File: [" << entry.path().filename().string() << "]" << '\n';
+            }
+        }
+        file.close();
+        file.clear();
+    }
+    if (targetFound)
+        return;
+
+    std::cout << target << " not found.\n";
+    return;
 }
 
 void rmExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
