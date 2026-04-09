@@ -140,13 +140,78 @@ void commandHandler(const uint32_t& commandIndex, std::vector<std::string>& inpu
             grepExec(commandIndex, inputArgs, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Cp):
+            cpExec(inputArgs, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Mv):
             break;
     }
 }
 
-void cpExec(){}
+void cpExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
+{
+    std::string argsString{};
+    std::getline(argsStringStream, argsString);
+    utility::trimString(argsString);
+    setArgVec(argsString, inputArgs);
+
+    if (inputArgs.size() < 2)
+    {
+        std::cerr << RED_TEXT << "Error: Copy Command Needs an input & output file" << NORMAL_TEXT << std::endl;
+        return;
+    }
+    std::string& iFile{inputArgs[0]};
+    std::string& oFile{inputArgs[1]};
+    std::string commandString{};
+
+    if (!std::filesystem::exists(iFile) && !std::filesystem::exists(oFile))
+    {
+        std::string iFilePath{'"' + currentPath + '/' + iFile + '"'};
+        std::string oFilePath{'"' + currentPath + '/' + oFile + '"'};
+        std::replace(iFilePath.begin(), iFilePath.end(), '/', '\\'); 
+        commandString = "cmd.exe /C copy " + iFilePath + ' ' + oFilePath;
+    }
+    else if (!std::filesystem::exists(iFile) && std::filesystem::exists(oFile))
+    {
+        std::string iFilePath{currentPath + '/' + iFile};
+        std::replace(iFilePath.begin(), iFilePath.end(), '/', '\\');
+        commandString = "cmd.exe /C copy " + iFilePath + ' ' + oFile;
+    }
+    else if (std::filesystem::exists(iFile) && !std::filesystem::exists(oFile))
+    {
+        std::string oFilePath{currentPath + '/' + oFile};
+        std::replace(oFilePath.begin(), oFilePath.end(), '/', '\\');
+        commandString = "cmd.exe /C copy " + iFile + ' ' + oFilePath;
+    }
+    else
+        commandString = "cmd.exe /C copy " + iFile + ' ' + oFile;
+
+    STARTUPINFOA si_struct{};
+    si_struct.cb = sizeof(si_struct);
+    PROCESS_INFORMATION pi_struct{};
+    
+
+    if (!CreateProcessA(
+        nullptr,
+        commandString.data(),
+        nullptr,
+        nullptr,
+        false,
+        static_cast<DWORD>(0),
+        nullptr,
+        nullptr,
+        &si_struct,
+        &pi_struct
+    ))
+    {
+        std::cerr << RED_TEXT << "Error: Process Could Not Be Created for Copy Command. (code: " << GetLastError() << ")" << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    WaitForSingleObject(pi_struct.hProcess, INFINITE);
+    CloseHandle(pi_struct.hProcess);
+    CloseHandle(pi_struct.hThread);
+
+}
 
 void echoExec(std::istringstream& argsStringStream)
 {
