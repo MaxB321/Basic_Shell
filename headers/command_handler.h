@@ -2,7 +2,7 @@
 
 extern std::string currentPath;
 
-extern void catExec(std::istringstream& argsStringStream);
+extern void catExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream);
 extern void cdExec(const uint32_t& commandIndex, std::istringstream& argsStringStream);
 extern void commandHandler(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream); 
 extern void cpExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream);
@@ -22,4 +22,4 @@ extern void parseFileStringRec(const std::string& fileName, std::string& target,
 extern void parseDirStringRec(const std::string& fileName, std::string& target, const bool caseSensitive);
 extern void rmExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, std::istringstream& argsStringStream);
 extern void setArgVec(std::string& argsString, std::vector<std::string>& inputArgs);
-extern void touchExec(std::istringstream& argsStringStream);
+extern void touchExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream);

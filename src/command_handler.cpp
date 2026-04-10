@@ -8,11 +8,19 @@
 std::string currentPath{std::getenv("USERPROFILE")};
 
 
-void catExec(std::istringstream& argsStringStream)
+void catExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
 {
     std::filesystem::path filePath{currentPath};
-    std::string fileName{};
-    argsStringStream >> fileName;
+    std::string argsString{};
+    std::getline(argsStringStream, argsString);
+    setArgVec(argsString, inputArgs);
+    if (inputArgs.size() < 1)
+    {
+        std::cerr << RED_TEXT << "Error: Add file argument." << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    std::string& fileName{inputArgs[0]};
     filePath /= fileName;
 
     if (!std::filesystem::exists(filePath))
@@ -125,7 +133,7 @@ void commandHandler(const uint32_t& commandIndex, std::vector<std::string>& inpu
             system("CLS");
             break;
         case static_cast<uint32_t>(commandsEnum::Touch):
-            touchExec(argsStringStream);
+            touchExec(inputArgs, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Mkdir):
             mkdirExec(argsStringStream);
@@ -134,7 +142,7 @@ void commandHandler(const uint32_t& commandIndex, std::vector<std::string>& inpu
             rmExec(commandIndex, inputArgs, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Cat):
-            catExec(argsStringStream);
+            catExec(inputArgs, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Grep):
             grepExec(commandIndex, inputArgs, argsStringStream);
@@ -786,11 +794,19 @@ void setArgVec(std::string& argsString, std::vector<std::string>& inputArgs)
     }
 }
 
-void touchExec(std::istringstream& argsStringStream)
+void touchExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
 {
     std::filesystem::path filePath{currentPath};
-    std::string fileName{};
-    argsStringStream >> fileName;
+    std::string argsString{};
+    std::getline(argsStringStream, argsString);
+    setArgVec(argsString, inputArgs);
+    if (inputArgs.size() < 1)
+    {
+        std::cerr << RED_TEXT << "Error: Add file argument." << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    std::string& fileName{inputArgs[0]};
     filePath /= fileName;
 
     if (std::filesystem::exists(filePath))
