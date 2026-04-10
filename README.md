@@ -11,9 +11,9 @@ Featured Commands:
   6. clear
   7. touch
   8. mkdir
-  9. rm      
-  10. rm -r 
+  9. rm  
+  10. rm -r
   11. cat
-  12. grep    
-  13. cp      - NOT DONE
-  14. mv      - NOT DONE
+  12. grep
+  13. cp
+  14. mv

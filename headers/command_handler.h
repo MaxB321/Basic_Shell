@@ -16,7 +16,7 @@ extern bool isValidArgs(const uint32_t& commandIndex, std::vector<std::string>& 
 extern bool isValidPath(std::string& path);
 extern void lsExec();
 extern void mkdirExec(std::istringstream& argsStringStream);
-extern void mvExec();
+extern void mvExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream);
 extern void parseFileString(const std::string& fileName, std::string& target, const bool caseSensitive);
 extern void parseFileStringRec(const std::string& fileName, std::string& target, const bool caseSensitive);
 extern void parseDirStringRec(const std::string& fileName, std::string& target, const bool caseSensitive);

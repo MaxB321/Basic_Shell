@@ -143,6 +143,7 @@ void commandHandler(const uint32_t& commandIndex, std::vector<std::string>& inpu
             cpExec(inputArgs, argsStringStream);
             break;
         case static_cast<uint32_t>(commandsEnum::Mv):
+            mvExec(inputArgs, argsStringStream);
             break;
     }
 }
@@ -491,7 +492,70 @@ void mkdirExec(std::istringstream& argsStringStream)
     std::filesystem::create_directory(dirPath);
 }
 
-void mvExec(){}
+void mvExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
+{
+    std::string argsString{};
+    std::getline(argsStringStream, argsString);
+    utility::trimString(argsString);
+    setArgVec(argsString, inputArgs);
+
+    if (inputArgs.size() < 2)
+    {
+        std::cerr << RED_TEXT << "Error: Move Command Needs an input & output file" << NORMAL_TEXT << std::endl;
+        return;
+    }
+    std::string& srcFile{inputArgs[0]};
+    std::string& dstFile{inputArgs[1]};
+    std::string commandString{};
+
+    if (!std::filesystem::exists(srcFile) && !std::filesystem::exists(dstFile))
+    {
+        std::string srcFilePath{'"' + currentPath + '/' + srcFile + '"'};
+        std::string dstFilePath{'"' + currentPath + '/' + dstFile + '"'};
+        std::replace(srcFilePath.begin(), srcFilePath.end(), '/', '\\'); 
+        commandString = "cmd.exe /C move " + srcFilePath + ' ' + dstFilePath;
+    }
+    else if (!std::filesystem::exists(srcFile) && std::filesystem::exists(dstFile))
+    {
+        std::string srcFilePath{currentPath + '/' + srcFile};
+        std::replace(srcFilePath.begin(), srcFilePath.end(), '/', '\\');
+        commandString = "cmd.exe /C move " + srcFilePath + ' ' + dstFile;
+    }
+    else if (std::filesystem::exists(srcFile) && !std::filesystem::exists(dstFile))
+    {
+        std::string dstFilePath{currentPath + '/' + dstFile};
+        std::replace(dstFilePath.begin(), dstFilePath.end(), '/', '\\');
+        commandString = "cmd.exe /C move " + srcFile + ' ' + dstFilePath;
+    }
+    else
+        commandString = "cmd.exe /C move " + srcFile + ' ' + dstFile;
+
+    STARTUPINFOA si_struct{};
+    si_struct.cb = sizeof(si_struct);
+    PROCESS_INFORMATION pi_struct{};
+    
+
+    if (!CreateProcessA(
+        nullptr,
+        commandString.data(),
+        nullptr,
+        nullptr,
+        false,
+        static_cast<DWORD>(0),
+        nullptr,
+        nullptr,
+        &si_struct,
+        &pi_struct
+    ))
+    {
+        std::cerr << RED_TEXT << "Error: Process Could Not Be Created for Copy Command. (code: " << GetLastError() << ")" << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    WaitForSingleObject(pi_struct.hProcess, INFINITE);
+    CloseHandle(pi_struct.hProcess);
+    CloseHandle(pi_struct.hThread);
+}
 
 void parseFileString(const std::string& fileName, std::string& target, const bool caseSensitive)
 {
