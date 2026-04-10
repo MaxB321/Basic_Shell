@@ -729,9 +729,21 @@ void rmExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs, s
     std::getline(argsStringStream, argsString);
     setArgVec(argsString, inputArgs);
     
+    if (inputArgs.size() < 1)
+    {
+        std::cerr << RED_TEXT << "Error: Invalid Arguments." << NORMAL_TEXT << std::endl;
+        return;
+    }
+
     // recursive rm
     if (isValidArgs(commandIndex, inputArgs))
     {
+        if (inputArgs.size() < 2)
+        {
+            std::cerr << RED_TEXT << "Error: Missing Argument." << NORMAL_TEXT << std::endl;
+            return;
+        }
+
         std::filesystem::directory_entry recEntry{currentPath + '/' + inputArgs[1]};
         
         if (std::filesystem::exists(recEntry))
