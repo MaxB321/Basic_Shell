@@ -364,6 +364,10 @@ void grepWithArgs(std::string& targetString, const std::string& fileName)
 void handleRelativePathing(std::string& path)
 {
     std::string tempPath{currentPath};
+    bool isRoot{false};
+
+    if (std::filesystem::path {tempPath}.root_path().string() == tempPath)
+        isRoot = true;
 
     if ((path[0] == '.') && (path[1] == '/'))
     {
@@ -392,6 +396,12 @@ void handleRelativePathing(std::string& path)
 
     std::filesystem::path pathObj{currentPath};
     if (pathObj.parent_path() == pathObj.root_path())
+    {
+        if (currentPath.substr(2, 2) == "//")
+            currentPath.erase(3, 1);
+    }
+
+    if (isRoot)
     {
         if (currentPath.substr(2, 2) == "//")
             currentPath.erase(3, 1);

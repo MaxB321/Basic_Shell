@@ -17,3 +17,9 @@ Featured Commands:
   12. grep
   13. cp
   14. mv
+
+
+To build, simply run the build script with the Debug/Release Argument. If no argument is specified it will default to Debug Build.
+Ex: .\build.bat Debug
+
+The clean script works in the same way. If no argument is specified it will clean both debug and release builds.
