@@ -20,6 +20,7 @@ Featured Commands:
 
 
 **BUILD GUIDE**
+
 To build, simply run the build script with the Debug/Release Argument. If no argument is specified it will default to Debug Build.
 Ex: .\build.bat Debug
 
