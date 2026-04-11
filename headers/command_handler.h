@@ -1,3 +1,5 @@
+#pragma once
+
 #include "pch.h"
 
 extern std::string currentPath;
