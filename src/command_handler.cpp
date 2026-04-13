@@ -698,8 +698,11 @@ void parseDirStringRec(const std::string& dirName, std::string& target, const bo
     }
 
     utility::toLowerString(target);
-    for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(directory))
+    for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(directory))
     {
+        if (!entry.is_regular_file())
+            continue;
+
         lineNumber = 0;
         file.open(entry.path());
         while (std::getline(file, line))
