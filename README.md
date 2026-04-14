@@ -5,7 +5,7 @@ Featured Commands:
   2. echo
   3. pwd
   4. cd
-    - special chars:
+      - special chars:
       - . (keep current directory)
       - .. (go to parent directory)
       - / (go to root directory)
@@ -19,9 +19,9 @@ Featured Commands:
   10. rm -r
   11. cat
   12. grep
-    - Flags: -i, -r (case insensitive and recursive respectively)
-    - Can use these one or both flags 
-    - ex: grep -i -r text dir_name 
+      - Flags: -i, -r (case insensitive and recursive respectively)
+      - Can use these one or both flags 
+      - ex: grep -i -r text dir_name 
   13. cp
   14. mv
 
