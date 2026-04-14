@@ -4,8 +4,21 @@
 #include "flags.h"
 
 
+void handleSigInt(int)
+{
+	std::signal(SIGINT, handleSigInt); // re-register signal to suppress default termination
+
+	if (cmdHandlerFlags::commandExecuting)
+	{
+		cmdHandlerFlags::commandInterrupted = true;
+	}
+}
+
+
 int main()
 {
+	std::signal(SIGINT, handleSigInt);
+
 	std::string userInput{};
 	std::string command{};
 	std::vector<std::string> inputArgs{};
@@ -15,7 +28,19 @@ int main()
 	while (PROGRAM_RUNNING)
 	{
 		std::cout << GREEN_TEXT << currentPath << "> " << NORMAL_TEXT;
+
 		std::getline(std::cin, userInput);
+
+		if (std::cin.fail())
+        {
+            std::cin.clear();
+            std::cout << std::endl;
+            continue;
+        }
+
+		if (userInput.empty())
+			continue;
+
 		std::istringstream inputStream(userInput);
 		inputStream >> command;
 		std::istringstream& argsString{inputStream};
@@ -29,8 +54,11 @@ int main()
 		else
 		{
 			uint32_t command_index = static_cast<uint32_t>(arr_it - std::begin(commands));
+			cmdHandlerFlags::commandExecuting = true;
 			commandHandler(command_index, inputArgs, argsString);
 		}
+		cmdHandlerFlags::commandInterrupted = false;
+		cmdHandlerFlags::commandExecuting = false;
 		inputArgs.clear();
 	}
 

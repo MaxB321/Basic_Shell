@@ -2,6 +2,12 @@
 
 #include "pch.h"
 
+namespace cmdHandlerFlags
+{
+	inline bool commandInterrupted{false};
+	inline bool commandExecuting{false};
+}
+
 extern std::string currentPath;
 
 extern void catExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream);

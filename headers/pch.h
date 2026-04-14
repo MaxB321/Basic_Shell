@@ -12,3 +12,6 @@
 #include <algorithm>
 #include <iterator>
 #include <sstream>
+#include <csignal>
+#include <limits>
+

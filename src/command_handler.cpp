@@ -689,6 +689,13 @@ void parseDirStringRec(const std::string& dirName, std::string& target, const bo
             }
             file.close();
             file.clear();
+
+            if (cmdHandlerFlags::commandInterrupted)
+            {
+                std::cout << "^C\n" << std::endl;
+                return;
+            }
+                
         }
         if (targetFound)
             return;
@@ -718,6 +725,12 @@ void parseDirStringRec(const std::string& dirName, std::string& target, const bo
         }
         file.close();
         file.clear();
+
+        if (cmdHandlerFlags::commandInterrupted)
+        {
+            std::cout << "^C\n" << std::endl;
+            return;
+        }
     }
     if (targetFound)
         return;
