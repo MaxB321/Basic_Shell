@@ -2,11 +2,6 @@
 
 #include "pch.h"
 
-namespace cmdHandlerFlags
-{
-	inline bool commandInterrupted{false};
-	inline bool commandExecuting{false};
-}
 
 extern std::string currentPath;
 

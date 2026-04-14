@@ -8,9 +8,9 @@ void handleSigInt(int)
 {
 	std::signal(SIGINT, handleSigInt); // re-register signal to suppress default termination
 
-	if (cmdHandlerFlags::commandExecuting)
+	if (COMMAND_EXECUTING)
 	{
-		cmdHandlerFlags::commandInterrupted = true;
+		COMMAND_INTERRUPTED = true;
 	}
 }
 
@@ -54,11 +54,11 @@ int main()
 		else
 		{
 			uint32_t command_index = static_cast<uint32_t>(arr_it - std::begin(commands));
-			cmdHandlerFlags::commandExecuting = true;
+			COMMAND_EXECUTING = true;
 			commandHandler(command_index, inputArgs, argsString);
 		}
-		cmdHandlerFlags::commandInterrupted = false;
-		cmdHandlerFlags::commandExecuting = false;
+		COMMAND_INTERRUPTED = false;
+		COMMAND_EXECUTING = false;
 		inputArgs.clear();
 	}
 

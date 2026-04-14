@@ -690,7 +690,7 @@ void parseDirStringRec(const std::string& dirName, std::string& target, const bo
             file.close();
             file.clear();
 
-            if (cmdHandlerFlags::commandInterrupted)
+            if (COMMAND_INTERRUPTED)
             {
                 std::cout << "^C\n" << std::endl;
                 return;
@@ -726,7 +726,7 @@ void parseDirStringRec(const std::string& dirName, std::string& target, const bo
         file.close();
         file.clear();
 
-        if (cmdHandlerFlags::commandInterrupted)
+        if (COMMAND_INTERRUPTED)
         {
             std::cout << "^C\n" << std::endl;
             return;
