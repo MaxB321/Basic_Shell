@@ -3,6 +3,7 @@
 #include "enums.h"
 #include "flags.h"
 #include "utility.h"
+#include "threading.h"
 
 
 std::string currentPath{std::getenv("USERPROFILE")};
@@ -672,7 +673,7 @@ void parseDirStringRec(const std::string& dirName, std::string& target, const bo
 
     if (!caseSensitive)
     {
-        for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(directory))
+        for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(directory))
         {
             lineNumber = 0;
             file.open(entry.path());

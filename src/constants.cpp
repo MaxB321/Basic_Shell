@@ -24,5 +24,4 @@ const std::string_view grepArgs[] {
     "-i",
     "-r",
 };
-const std::string_view lsAllFlag{"-a"};
 const std::string_view rmRecFlag{"-r"};

@@ -13,5 +13,4 @@
 extern const std::string_view cdArgs[3];
 extern const std::string_view commands[13];
 extern const std::string_view grepArgs[2];
-extern const std::string_view lsAllFlag;
 extern const std::string_view rmRecFlag;
