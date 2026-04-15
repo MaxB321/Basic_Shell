@@ -5,13 +5,14 @@ namespace
 {
     std::mutex queueMutex{};
     std::mutex outputMutex{};
+    bool targetFound{false};
 }
 
 
 std::queue<std::filesystem::directory_entry> threadingFuncs::mkEntryQueue(std::string& directory)
 {
     std::queue<std::filesystem::directory_entry> dirEntries{};
-    for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(directory))
+    for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(directory))
     {
         dirEntries.push(entry);
     }
@@ -20,14 +21,18 @@ std::queue<std::filesystem::directory_entry> threadingFuncs::mkEntryQueue(std::s
 
 void threadingFuncs::mtParseDirStringRec(std::queue<std::filesystem::directory_entry>& dirEntries, std::string& target, bool caseSensitive)
 {
+    std::atomic<bool> threadFailedCreation{false};
+
     ThreadData* data1 = new ThreadData{
         &dirEntries,
-        target
+        target,
+        &threadFailedCreation
     };
 
     ThreadData* data2 = new ThreadData{
         &dirEntries,
-        target
+        target,
+        &threadFailedCreation
     };
 
     HANDLE thread1{};
@@ -35,7 +40,7 @@ void threadingFuncs::mtParseDirStringRec(std::queue<std::filesystem::directory_e
 
     if (caseSensitive)
     {
-        HANDLE thread1 = CreateThread(
+        thread1 = CreateThread(
             nullptr,
             0,
             mtParseFuncCs,
@@ -44,7 +49,7 @@ void threadingFuncs::mtParseDirStringRec(std::queue<std::filesystem::directory_e
             nullptr
         );
 
-        HANDLE thread2 = CreateThread(
+        thread2 = CreateThread(
             nullptr,
             0,
             mtParseFuncCs,
@@ -55,7 +60,7 @@ void threadingFuncs::mtParseDirStringRec(std::queue<std::filesystem::directory_e
     }
     else
     {
-        HANDLE thread1 = CreateThread(
+        thread1 = CreateThread(
             nullptr,
             0,
             mtParseFuncCi,
@@ -64,7 +69,7 @@ void threadingFuncs::mtParseDirStringRec(std::queue<std::filesystem::directory_e
             nullptr
         );
 
-        HANDLE thread2 = CreateThread(
+        thread2 = CreateThread(
             nullptr,
             0,
             mtParseFuncCi,
@@ -74,11 +79,40 @@ void threadingFuncs::mtParseDirStringRec(std::queue<std::filesystem::directory_e
         );
     }
     
+    if (!thread1 || !thread2)
+    {
+        threadFailedCreation = true;
+        if (thread1)
+        {
+            WaitForSingleObject(thread1, INFINITE);
+            CloseHandle(thread1);
+        }
+        else
+        {
+            delete data1;
+        }
+        if (thread2)
+        {
+            WaitForSingleObject(thread2, INFINITE);
+            CloseHandle(thread2);
+        }
+        else
+        {
+            delete data2;
+        }
+
+        std::cerr << "Failed to create thread(s)." << std::endl;
+        targetFound = false;
+        return;
+    }
 
     WaitForSingleObject(thread1, INFINITE);
     WaitForSingleObject(thread2, INFINITE);
     CloseHandle(thread1);
     CloseHandle(thread2);
+
+    if (!targetFound)
+        std::cerr << target << " not found." << std::endl;
 }
 
 // case insensitive
@@ -97,14 +131,17 @@ DWORD WINAPI threadingFuncs::mtParseFuncCs(LPVOID lpParam)
 {
     ThreadData* data = static_cast<ThreadData*>(lpParam);
     std::queue<std::filesystem::directory_entry>& dirEntries = *data->dirEntries;
-    std::string& target = data->target;
     uint32_t lineNumber{0};
-    bool targetFound{};
     std::ifstream file{};
     std::string line{};
 
+    std::vector<Match> outputBuffer{};
+
     while (true)
     {
+        if (*data->threadFailedCreation)
+            break;
+
         std::filesystem::directory_entry entry{};
 
         {
@@ -123,11 +160,10 @@ DWORD WINAPI threadingFuncs::mtParseFuncCs(LPVOID lpParam)
         {
             ++lineNumber;
 
-            if (line.find(target) != std::string::npos) 
+            if (line.find(data->target) != std::string::npos) 
             {
-                targetFound = true;
                 utility::trimString(line);
-                std::cout << line << "\tline: " << lineNumber <<  "; File: [" << entry.path().filename().string() << "]" << '\n';
+                outputBuffer.push_back({line, lineNumber, entry.path().filename().string()});
             }
         }
         file.close();
@@ -135,9 +171,22 @@ DWORD WINAPI threadingFuncs::mtParseFuncCs(LPVOID lpParam)
 
         if (COMMAND_INTERRUPTED)
         {
-            std::cout << "^C\n" << std::endl;
             break;
         }
+
+        if (outputBuffer.empty())
+            continue;
+
+        {
+            std::lock_guard<std::mutex> lock(outputMutex);
+
+            for (Match& targetMatch : outputBuffer)
+            {
+                std::cout << targetMatch.text << "\tline: " << targetMatch.line <<  "; File: [" << targetMatch.fileName << "]" << '\n';
+            }
+        }
+        outputBuffer.clear();
+        targetFound = true;
     }
 
     delete data;

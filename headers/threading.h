@@ -12,8 +12,16 @@ namespace threadingFuncs
     extern DWORD WINAPI mtParseFuncCs(LPVOID lpParam);
 }
 
+struct Match
+{
+    std::string text{};
+    std::uint32_t line{};
+    std::string fileName{};
+};
+
 struct ThreadData
 {
-    std::queue<std::filesystem::directory_entry>* dirEntries;
-    std::string target;
+    std::queue<std::filesystem::directory_entry>* dirEntries{};
+    std::string target{};
+    std::atomic<bool>* threadFailedCreation{};
 };
