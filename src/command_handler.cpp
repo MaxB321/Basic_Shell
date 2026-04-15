@@ -576,13 +576,13 @@ void mvExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringS
     CloseHandle(pi_struct.hThread);
 }
 
-void parseFileString(const std::string& fileName, std::string& target, const bool caseSensitive)
+void parseFileString(const std::string& fileName, std::string& target, const bool caseInsensitive)
 {
     uint32_t lineNumber{0};
     std::ifstream file(currentPath + '/' + fileName);
     std::string line{};
 
-    if (!caseSensitive)
+    if (!caseInsensitive)
     {
         while (std::getline(file, line))
         {
@@ -617,14 +617,14 @@ void parseFileString(const std::string& fileName, std::string& target, const boo
     return;
 }
 
-void parseFileStringRec(const std::string& fileName, std::string& target, const bool caseSensitive)
+void parseFileStringRec(const std::string& fileName, std::string& target, const bool caseInsensitive)
 {
     uint32_t lineNumber{0};
     uint32_t prevLineNumber{0};
     std::ifstream file(currentPath + '/' + fileName);
     std::string line{};
 
-    if (!caseSensitive)
+    if (!caseInsensitive)
     {
         while (std::getline(file, line))
         {
@@ -663,7 +663,7 @@ void parseFileStringRec(const std::string& fileName, std::string& target, const 
     return;
 }
 
-void parseDirStringRec(const std::string& dirName, std::string& target, const bool caseSensitive)
+void parseDirStringRec(const std::string& dirName, std::string& target, const bool caseInsensitive)
 {
     uint32_t lineNumber{0};
     bool targetFound{};
@@ -671,7 +671,7 @@ void parseDirStringRec(const std::string& dirName, std::string& target, const bo
     std::ifstream file{};
     std::string line{};
 
-    if (!caseSensitive)
+    if (!caseInsensitive)
     {
         for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(directory))
         {
