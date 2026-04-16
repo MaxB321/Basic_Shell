@@ -154,6 +154,9 @@ void commandHandler(const uint32_t& commandIndex, std::vector<std::string>& inpu
         case static_cast<uint32_t>(commandsEnum::Mv):
             mvExec(inputArgs, argsStringStream);
             break;
+        case static_cast<uint32_t>(commandsEnum::GrepMt):
+            grepMtExec(inputArgs, argsStringStream);
+            break;
     }
 }
 
@@ -297,6 +300,50 @@ void grepExec(const uint32_t& commandIndex, std::vector<std::string>& inputArgs,
         std::cerr << RED_TEXT << "Error: [" << fileName << "] is a directory." << NORMAL_TEXT << std::endl;
         return;
     }
+}
+
+// multi threaded grep
+void grepMtExec(std::vector<std::string>& inputArgs, std::istringstream& argsStringStream)
+{
+    std::string argsString{};
+    std::getline(argsStringStream, argsString);
+    setArgVec(argsString, inputArgs);
+    if (inputArgs.size() < 2)
+    {
+        utility::trimString(argsString);
+        std::cerr << RED_TEXT << "(" << argsString << ") is not a valid argument" << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    // case sensitive
+    if (inputArgs.size() < 3)
+    {
+        std::string& targetString{inputArgs[0]};
+        std::string& dirName{inputArgs[1]};
+        std::string dirPath{currentPath + '/' + dirName};
+
+        if (!isValidPath(dirName) && !isValidPath(dirPath))
+        {
+            std::cerr << RED_TEXT << "(" << dirName << ") is not a valid directory" << NORMAL_TEXT << std::endl;
+            return;
+        }
+
+        if (isValidPath(dirName))
+        {
+            dirPath = dirName;
+        }
+
+        if (!std::filesystem::is_directory(dirPath))
+        {
+            std::cerr << RED_TEXT << "(" << dirPath << ") is not a valid directory" << NORMAL_TEXT << std::endl;
+            return;
+        }
+
+        std::queue<std::filesystem::directory_entry> dirEntries{threadingFuncs::mkEntryQueue(dirPath)};
+        threadingFuncs::mtParseDirStringRec(dirEntries, targetString, true);
+    }
+
+    // case insensitive
 }
 
 void grepWithArgs(const std::string& flag, std::string& targetString, const std::string& fileName)

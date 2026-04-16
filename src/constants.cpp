@@ -18,7 +18,8 @@ const std::string_view commands[] {
     "cat",
     "grep",
     "cp",
-    "mv"
+    "mv",
+    "grepMt"
 };
 const std::string_view grepArgs[] {
     "-i",

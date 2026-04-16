@@ -16,5 +16,6 @@ enum class commandsEnum : uint32_t
     Cat,
     Grep,
     Cp,
-    Mv
+    Mv,
+    GrepMt
 };
