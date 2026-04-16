@@ -341,9 +341,40 @@ void grepMtExec(std::vector<std::string>& inputArgs, std::istringstream& argsStr
 
         std::queue<std::filesystem::directory_entry> dirEntries{threadingFuncs::mkEntryQueue(dirPath)};
         threadingFuncs::mtParseDirStringRec(dirEntries, targetString, true);
+        return;
     }
 
     // case insensitive
+    std::string& flagArg{inputArgs[0]};
+    std::string& targetString{inputArgs[1]};
+    std::string& dirName{inputArgs[2]};
+    std::string dirPath{currentPath + '/' + dirName};
+
+    if (flagArg != "-i")
+    {
+        std::cerr << RED_TEXT << "(" << dirName << ") is not a valid flag" << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    if (!isValidPath(dirName) && !isValidPath(dirPath))
+    {
+        std::cerr << RED_TEXT << "(" << dirName << ") is not a valid directory" << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    if (isValidPath(dirName))
+    {
+        dirPath = dirName;
+    }
+
+    if (!std::filesystem::is_directory(dirPath))
+    {
+        std::cerr << RED_TEXT << "(" << dirPath << ") is not a valid directory" << NORMAL_TEXT << std::endl;
+        return;
+    }
+
+    std::queue<std::filesystem::directory_entry> dirEntries{threadingFuncs::mkEntryQueue(dirPath)};
+    threadingFuncs::mtParseDirStringRec(dirEntries, targetString, false);
 }
 
 void grepWithArgs(const std::string& flag, std::string& targetString, const std::string& fileName)

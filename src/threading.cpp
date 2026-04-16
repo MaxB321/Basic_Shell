@@ -128,7 +128,64 @@ namespace
     {
         ThreadData* data = static_cast<ThreadData*>(lpParam);
         std::queue<std::filesystem::directory_entry>& dirEntries = *data->dirEntries;
-        std::string& target = data->target;
+        uint32_t lineNumber{0};
+        std::ifstream file{};
+        std::string line{};
+        std::filesystem::directory_entry entry{};
+
+        std::vector<Match> outputBuffer{};
+        utility::toLowerString(data->target);
+
+        while (true)
+        {
+            if (*data->threadFailedCreation)
+                break;
+
+            {
+                std::lock_guard<std::mutex> lock(queueMutex);
+
+                if (dirEntries.empty())
+                    break;
+                
+                entry = dirEntries.front();
+                dirEntries.pop(); 
+            }
+
+            lineNumber = 0;
+            file.open(entry.path());
+            while (std::getline(file, line))
+            {
+                ++lineNumber;
+
+                utility::toLowerString(line);
+                if (line.find(data->target) != std::string::npos) 
+                {
+                    utility::trimString(line);
+                    outputBuffer.push_back({line, lineNumber, entry.path().filename().string()});
+                }
+            }
+            file.close();
+            file.clear();
+
+            if (COMMAND_INTERRUPTED)
+            {
+                break;
+            }
+
+            if (outputBuffer.empty())
+                continue;
+
+            {
+                std::lock_guard<std::mutex> lock(outputMutex);
+
+                for (Match& targetMatch : outputBuffer)
+                {
+                    std::cout << targetMatch.text << "\tline: " << targetMatch.line <<  "; File: [" << targetMatch.fileName << "]" << '\n';
+                }
+            }
+            outputBuffer.clear();
+            targetFound = true;
+        }
 
         delete data;
         return 0;

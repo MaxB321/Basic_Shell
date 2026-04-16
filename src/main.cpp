@@ -19,6 +19,7 @@ int main()
 {
 	std::signal(SIGINT, handleSigInt);
 
+	SetConsoleTitleA("Basic_Shell");
 	std::string userInput{};
 	std::string command{};
 	std::vector<std::string> inputArgs{};

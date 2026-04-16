@@ -24,6 +24,10 @@ Featured Commands:
       - ex: grep -i -r text dir_name 
   13. cp
   14. mv
+  15. grepMt
+      - multi threaded grep
+      - use -i flag for case insensitive grep
+      - only works on directories
 
 
 **BUILD GUIDE**
